@@ -5,46 +5,55 @@ import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
-app.use(express.json());
-app.use(cors({ origin: "*" }));
 
+/* 🔥 PORTA DINÂMICA (Render usa isso) */
+const PORT = process.env.PORT || 3001;
+
+/* 🔥 CORS liberado (depois ajustamos para Vercel) */
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"]
+}));
+
+app.use(express.json());
 app.use("/api/users", userRoutes);
 
+/* 🔥 servidor HTTP separado */
 const server = http.createServer(app);
 
+/* 🔥 socket.io preparado para produção */
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"],
-  },
+    methods: ["GET", "POST"]
+  }
 });
 
-// 🔥 usuários conectados
-const onlineUsers = {};
+/* ================= SOCKET ================= */
+
+let onlineUsers = [];
 
 io.on("connection", (socket) => {
-  console.log("Conectado:", socket.id);
+  console.log("Usuário conectado:", socket.id);
 
-  // quando entra no chat
-  socket.on("join", (user) => {
-    onlineUsers[socket.id] = user;
-    io.emit("onlineUsers", Object.values(onlineUsers));
+  socket.on("join", (name) => {
+    if (!onlineUsers.includes(name)) {
+      onlineUsers.push(name);
+    }
+    io.emit("onlineUsers", onlineUsers);
   });
 
-  // mensagens
   socket.on("sendMessage", (data) => {
     io.emit("receiveMessage", data);
   });
 
-  // quando sai
   socket.on("disconnect", () => {
-    delete onlineUsers[socket.id];
-    io.emit("onlineUsers", Object.values(onlineUsers));
-    console.log("Desconectado:", socket.id);
+    console.log("Usuário desconectado:", socket.id);
   });
 });
 
-const PORT = process.env.PORT || 3001;
+/* ================= START ================= */
+
 server.listen(PORT, () => {
-  console.log(`🔥 Backend rodando na porta ${PORT}`);
+  console.log(`🚀 Backend rodando na porta ${PORT}`);
 });
