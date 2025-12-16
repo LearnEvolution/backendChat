@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1765513025978,
+    "name": "Teste",
+    "email": "teste@local",
+    "password": "$2a$10$Qj/XgsHJIO.FY6/rNdKtUeZw5D1Mb4MwF0B2MtqNsx/A8IcZ5TatO"
+  },
+  {
+    "id": 1765684443608,
+    "name": "Cleber",
+    "email": "cleber@gmail.com",
+    "password": "$2a$10$eWq2w2deNTU/P3Nt.9ElTeVeWCKzposrUBGe914GGA6CAEU8v5hem"
+  },
+  {
+    "id": 1765685728081,
+    "name": "Pedro",
+    "email": "pedro@local",
+    "password": "$2a$10$S.ZpAzP7g6lcUGQRJEOxpeCM0nl04mG3mynNp33JS/ps4idYfla9."
+  },
+  {
+    "id": 1765686687254,
+    "name": "Luiza",
+    "email": "luiza@local",
+    "password": "$2a$10$CKKFebPzn4HG8qY1avVcb.cJSqN2IHTss5nJ/oFYWc.Pei85Le7ua"
+  },
+  {
+    "id": 1765687651169,
+    "name": "Oi",
+    "email": "oi@local",
+    "password": "$2a$10$srw59xpeP2edHvAJvsmUiOAnS.5.9rGf61ilG6beqYfFIpbnaAVO6"
+  },
+  {
+    "id": 1765688399714,
+    "name": "Oioi",
+    "email": "oioi@local",
+    "password": "$2a$10$H/D6TAjhEA8BB4pqQ9yaeOS5pye81v/MCvpir6rxl9fjEqPydW/86"
+  },
+  {
+    "id": 1765691578393,
+    "name": "ABC",
+    "email": "abc@local",
+    "password": "$2a$10$lYnzdnYjktuo/VprQgKTau/276JQmRJqgoL5K8Z64WUGHY6nw.6T."
+  },
+  {
+    "id": 1765857744449,
+    "name": "Abc",
+    "email": "abc@gmail.com",
+    "password": "$2a$10$Ei1wWE.h95xp7LL6c7RAROFnllQxi188y/kM23f3bGVSVJPFOYLVW"
+  }
+]
