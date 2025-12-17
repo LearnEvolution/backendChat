@@ -46,5 +46,11 @@
     "name": "Abc",
     "email": "abc@gmail.com",
     "password": "$2a$10$Ei1wWE.h95xp7LL6c7RAROFnllQxi188y/kM23f3bGVSVJPFOYLVW"
+  },
+  {
+    "id": 1765929189750,
+    "name": "oi",
+    "email": "oi@gmail.com",
+    "password": "$2a$10$oVnBS0XMW3IRbZIJnT/rl.1zO7T4PF0djghKmY.1Cr59ZTFnGe.oq"
   }
 ]

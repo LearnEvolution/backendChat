@@ -2,7 +2,10 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+
 import userRoutes from "./routes/userRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
+import { saveMessage } from "./controllers/messageController.js"; // 👈 IMPORT NOVO
 
 const app = express();
 
@@ -17,6 +20,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use("/api/users", userRoutes);
+app.use("/api/messages", messageRoutes);
 
 /* 🔥 servidor HTTP separado */
 const server = http.createServer(app);
@@ -43,8 +47,15 @@ io.on("connection", (socket) => {
     io.emit("onlineUsers", onlineUsers);
   });
 
-  socket.on("sendMessage", (data) => {
+  socket.on("sendMessage", async (data) => {
     io.emit("receiveMessage", data);
+
+    // 🔥 SALVANDO NO BANCO
+    try {
+      await saveMessage(data);
+    } catch (err) {
+      console.log("Erro ao salvar mensagem:", err.message);
+    }
   });
 
   socket.on("disconnect", () => {
