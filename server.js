@@ -1,31 +1,21 @@
 import express from "express";
+import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
-import cors from "cors";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
 import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
-import { saveMessage } from "./controllers/messageController.js"; // 👈 IMPORT NOVO
+
+dotenv.config();
 
 const app = express();
-
-/* 🔥 PORTA DINÂMICA (Render usa isso) */
-const PORT = process.env.PORT || 3001;
-
-/* 🔥 CORS liberado (depois ajustamos para Vercel) */
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST"]
-}));
-
+app.use(cors());
 app.use(express.json());
-app.use("/api/users", userRoutes);
-app.use("/api/messages", messageRoutes);
 
-/* 🔥 servidor HTTP separado */
 const server = http.createServer(app);
 
-/* 🔥 socket.io preparado para produção */
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -33,38 +23,44 @@ const io = new Server(server, {
   }
 });
 
-/* ================= SOCKET ================= */
+// ====== MONGODB ======
+const mongoUrl =
+  process.env.MONGO_URL || "mongodb://127.0.0.1:27017/chat2";
 
+mongoose
+  .connect(mongoUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("🔥 MongoDB conectado"))
+  .catch((err) => console.log("❌ Erro MongoDB:", err));
+
+// ====== SOCKET ======
 let onlineUsers = [];
 
 io.on("connection", (socket) => {
-  console.log("Usuário conectado:", socket.id);
+  console.log("🔥 Usuário conectado");
 
   socket.on("join", (name) => {
-    if (!onlineUsers.includes(name)) {
-      onlineUsers.push(name);
-    }
+    onlineUsers.push(name);
     io.emit("onlineUsers", onlineUsers);
   });
 
-  socket.on("sendMessage", async (data) => {
+  socket.on("sendMessage", (data) => {
     io.emit("receiveMessage", data);
-
-    // 🔥 SALVANDO NO BANCO
-    try {
-      await saveMessage(data);
-    } catch (err) {
-      console.log("Erro ao salvar mensagem:", err.message);
-    }
   });
 
   socket.on("disconnect", () => {
-    console.log("Usuário desconectado:", socket.id);
+    console.log("❌ Usuário desconectado");
   });
 });
 
-/* ================= START ================= */
+// ====== ROTAS ======
+app.use("/api/users", userRoutes);
+app.use("/api/messages", messageRoutes);
+
+const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => {
-  console.log(`🚀 Backend rodando na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
