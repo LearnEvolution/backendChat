@@ -1,7 +1,10 @@
 import express from "express";
 import http from "http";
-import cors from "cors";
 import { Server } from "socket.io";
+import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -10,43 +13,44 @@ app.use(express.json());
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+    },
 });
 
-let users = [];
+let onlineUsers = [];
+let messages = [];
 
 io.on("connection", (socket) => {
 
-  socket.on("user_connected", (user) => {
-    const exists = users.find(u => u.id === user.id);
-    if (!exists) {
-      users.push({
-        socketId: socket.id,
-        name: user.name,
-        id: user.id
-      });
-    }
+    socket.on("userOnline", (user) => {
 
-    io.emit("online_users", users);
-  });
+        const exists = onlineUsers.find(u => u.email === user.email);
 
-  socket.on("send_message", (data) => {
-    io.emit("receive_message", data);
-  });
+        if (!exists) {
+            onlineUsers.push({ email: user.email });
+        }
 
-  socket.on("disconnect", () => {
-    users = users.filter(u => u.socketId !== socket.id);
-    io.emit("online_users", users);
-  });
+        io.emit("onlineUsers", onlineUsers);
+    });
+
+    socket.on("chatMessage", (msg) => {
+        messages.push(msg);
+        io.emit("chatMessage", msg);
+    });
+
+    socket.on("disconnect", () => {
+        io.emit("onlineUsers", onlineUsers);
+    });
 });
+
 
 app.get("/", (req, res) => {
-  res.send("Servidor rodando!");
+    res.send("API RUNNING ✅");
 });
 
-server.listen(3001, () => {
-  console.log("Server ON - Porta 3001");
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+    console.log("🔥 Servidor online porta " + PORT);
 });
