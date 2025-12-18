@@ -1,14 +1,7 @@
 import express from "express";
-import cors from "cors";
 import http from "http";
+import cors from "cors";
 import { Server } from "socket.io";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-
-import userRoutes from "./routes/userRoutes.js";
-import messageRoutes from "./routes/messageRoutes.js";
-
-dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -23,44 +16,37 @@ const io = new Server(server, {
   }
 });
 
-// ====== MONGODB ======
-const mongoUrl =
-  process.env.MONGO_URL || "mongodb://127.0.0.1:27017/chat2";
-
-mongoose
-  .connect(mongoUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("🔥 MongoDB conectado"))
-  .catch((err) => console.log("❌ Erro MongoDB:", err));
-
-// ====== SOCKET ======
-let onlineUsers = [];
+let users = [];
 
 io.on("connection", (socket) => {
-  console.log("🔥 Usuário conectado");
 
-  socket.on("join", (name) => {
-    onlineUsers.push(name);
-    io.emit("onlineUsers", onlineUsers);
+  socket.on("user_connected", (user) => {
+    const exists = users.find(u => u.id === user.id);
+    if (!exists) {
+      users.push({
+        socketId: socket.id,
+        name: user.name,
+        id: user.id
+      });
+    }
+
+    io.emit("online_users", users);
   });
 
-  socket.on("sendMessage", (data) => {
-    io.emit("receiveMessage", data);
+  socket.on("send_message", (data) => {
+    io.emit("receive_message", data);
   });
 
   socket.on("disconnect", () => {
-    console.log("❌ Usuário desconectado");
+    users = users.filter(u => u.socketId !== socket.id);
+    io.emit("online_users", users);
   });
 });
 
-// ====== ROTAS ======
-app.use("/api/users", userRoutes);
-app.use("/api/messages", messageRoutes);
+app.get("/", (req, res) => {
+  res.send("Servidor rodando!");
+});
 
-const PORT = process.env.PORT || 3001;
-
-server.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+server.listen(3001, () => {
+  console.log("Server ON - Porta 3001");
 });
